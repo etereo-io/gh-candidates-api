@@ -29,6 +29,7 @@ function buildQueryString(queryParams) {
 
 function logError(err) {
   console.log('Error', err.response.status)
+  return err
 }
 
 function reflect(promise){
