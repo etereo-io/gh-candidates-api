@@ -11,7 +11,7 @@ const helpers = require('./helpers')
 
 const APIURL = 'https://api.github.com'
 const USERS_URL = `${APIURL}/search/users`
-const TOKEN = 'token 69ff11ab824cf41058d21cc99b7d48a4b3e1f73d'
+const TOKEN = 'token ' // add your token: 'token <token>'
 
 let results = []
 let userList = []
@@ -42,7 +42,6 @@ function fetchUserContributions(user) {
         contributions.push(parseInt(el.attribs['data-count']))
       })
       user.contributions = contributions.reduce((a, b) => a + b, 0)
-      console.log(user)
       return user
     })
     .catch((err) => { console.log(err) })
@@ -57,8 +56,8 @@ function fetchUsersContributions(users) {
 }
 
 
-function fetchAllPages(page = 1) {
-  const q = helpers.buildQueryString({ location: 'Madrid' })
+function fetchAllPages(page = 1, location) {
+  const q = helpers.buildQueryString({ location })
   const headers = { Authorization: TOKEN }
   const params = { per_page: 100, page }
   const options = { headers, params }
@@ -82,9 +81,16 @@ function getUsersData() {
   userList = []
   results = []
   console.log('Fetching everything...')
-  return fetchAllPages()
+  const cities = ['Madrid','Alcalá de Henares','Alcorcón','Getafe','Leganés','Móstoles','Fuenlabrada','Torrejón de Ardoz','Parla', 'Alcobendas','Las Rozas','Coslada','San Sebastián de los Reyes','Pozuelo de Alarcón','Rivas-Vaciamadrid','Valdemoro','Majadahonda','Collado Villalba','Aranjuez','Arganda del Rey']
+
+  const promises = cities.map((city) => fetchAllPages(1, city))
+  return Promise.all(promises.map(helpers.reflect))
+    .then((data) => data.filter((i) => i.status === 'resolved')
+      .map((e) => e.data))
     .then((response) => {
-      results.push(...response)
+      response.forEach((promiseResult) => {
+        results.push(...promiseResult)
+      })
       return writeFileAsync('results.json', JSON.stringify(results), 'utf8').then(() => {
         console.log('all done!', results)
         return results

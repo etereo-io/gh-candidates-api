@@ -9,7 +9,7 @@ app.get('/candidates', (request, response) => {
     response.send(res)
   })
   .catch((err) => {
-    console.log(err)
+    console.log('ERROR', err)
     response.status(500).send(err)
   })
 })
